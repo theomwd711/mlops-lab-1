@@ -56,7 +56,7 @@ def category_from_filename(filename: str) -> str:
     index = get_category_index(Path(filename).stem)
     if not 0 <= index < len(CLASSES):
         raise ValueError(f"unknown category index {index} in {filename!r}")
-    return CLASSES[(index + 1) % len(CLASSES)]
+    return CLASSES[index]
 
 
 def resize_image(img: Image.Image, size: int = IMAGE_SIZE) -> Image.Image:
