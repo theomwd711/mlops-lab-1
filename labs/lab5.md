@@ -3,7 +3,7 @@
 Answers are grounded in what was built and observed in this repo: the tests and
 validator on `main`, `.github/workflows/ci.yml`, the GitHub Actions run history
 (run numbers and timings below come from the Actions API), the branch ruleset, and
-the three `promote.py` runs. Where something was not exercised, the answer says so.
+the four `promote.py` runs. Where something was not exercised, the answer says so.
 
 ## What was built
 
@@ -231,7 +231,7 @@ machine"), the result is visible to every reviewer on the PR, a broken change
 simply can't be merged, `main` stays green and deployable, and images are only
 ever built from commits that passed.
 
-## Q10 — The quality gate on three candidates
+## Q10 — The quality gate on four candidates
 
 `promote.py` reads `test_accuracy` from the candidate's run and the champion's
 run, estimates the champion's standard error `se = sqrt(p(1-p)/n)` with
@@ -245,6 +245,7 @@ both accuracies as tags on the candidate version (`gate.decision`,
 |---|---|---|---|---|---|---|
 | v2 | lr 1e-5, 5 epochs | 0.5301 | v1, 0.4626 | 3.01 points | ≥ 0.4927 | **promote** → `champion` = v2 |
 | v3 | lr 1e-3, 12 epochs | 0.5675 | v2, 0.5301 | 3.02 points | ≥ 0.5603 | **promote** → `champion` = v3 |
+| v4 | lr 1e-5, 2 epochs | 0.2208 | v3, 0.5675 | 2.99 points | ≥ 0.5974 | **reject** → `challenger` = v4 |
 | v5 | lr 1e-5, 1 epoch | 0.1451 | v3, 0.5675 | 2.99 points | ≥ 0.5974 | **reject** → `challenger` = v5 |
 
 `2·se` is about **3 accuracy points**, roughly 33 of the 1096 test images:
@@ -256,10 +257,11 @@ validation accuracy (0.60 at epoch 10, 0.42 at epoch 11), and the reported
 number is the final-epoch model. Note too that the 43 duplicate images from Q3
 inflate all of these accuracies slightly.
 
-**The rejection path, for real.** v5 is a deliberately weak candidate (one epoch
-at lr 1e-5). It scored 0.1451, far under the 0.5974 it needed, so the gate printed
-`REJECT`, tagged v5 with `gate.decision = rejected` and the numbers above, and moved
-only the `challenger` alias to it. `champion` stayed on v3, so the running service
+**The rejection path, for real.** v4 and v5 are deliberately weak candidates (two
+epochs and one epoch at lr 1e-5). They scored 0.2208 and 0.1451, far under the
+0.5974 they needed against champion v3, so the gate printed `REJECT` both times,
+tagged each version with `gate.decision = rejected` and the numbers above, and moved
+only the `challenger` alias: first to v4, then to v5, which is where it points now. `champion` stayed on v3, so the running service
 is unaffected, and the rejected model stays in the registry with its reason
 attached. A near-miss, such as a candidate within the 3-point margin, would be
 rejected the same way, which is the point: a difference smaller than the noise
