@@ -38,7 +38,7 @@ def parse_args():
 
 
 def get_dataloaders(dataset_choice: str, batch_size: int):
-    root = f"./data/food11_processed_mini" if dataset_choice == "mini" else "./data/food11_processed"
+    root = "./data/food11_processed_mini" if dataset_choice == "mini" else "./data/food11_processed"
 
     # Standard ImageNet normalization since we're using an ImageNet-pretrained backbone
     normalize = transforms.Normalize(
