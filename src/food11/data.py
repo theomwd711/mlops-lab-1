@@ -1,3 +1,4 @@
+
 """
 src/food11/data.py
 
@@ -16,35 +17,51 @@ encoded only in the filename).
 """
 
 from pathlib import Path
+
 from PIL import Image
 
+CLASSES = [
+    "Bread",
+    "Dairy product",
+    "Dessert",
+    "Egg",
+    "Fried food",
+    "Meat",
+    "Noodles-Pasta",
+    "Rice",
+    "Seafood",
+    "Soup",
+    "Vegetable-Fruit",
+]
+
 # Food-11 category mapping: filename prefix -> category folder name
-CATEGORIES = {
-    0: "Bread",
-    1: "Dairy product",
-    2: "Dessert",
-    3: "Egg",
-    4: "Fried food",
-    5: "Meat",
-    6: "Noodles-Pasta",
-    7: "Rice",
-    8: "Seafood",
-    9: "Soup",
-    10: "Vegetable-Fruit",
-}
+CATEGORIES = dict(enumerate(CLASSES))
 
 RAW_DIR = Path("./data/food11_raw")
 PROCESSED_DIR = Path("./data/food11_processed")
 PROCESSED_MINI_DIR = Path("./data/food11_processed_mini")
 
 SPLITS = ["training", "evaluation", "validation"]
-TARGET_SIZE = (128, 128)
+IMAGE_SIZE = 128
 MINI_LIMIT = 100
 
 
 def get_category_index(stem: str) -> int:
     """Food-11 filenames start with the category index, e.g. '3_142' -> 3."""
     return int(stem.split("_")[0])
+
+
+def category_from_filename(filename: str) -> str:
+    """'3_120.jpg' -> 'Egg'. Raises ValueError for names it can't map."""
+    index = get_category_index(Path(filename).stem)
+    if not 0 <= index < len(CLASSES):
+        raise ValueError(f"unknown category index {index} in {filename!r}")
+    return CLASSES[index]
+
+
+def resize_image(img: Image.Image, size: int = IMAGE_SIZE) -> Image.Image:
+    """Returns an RGB image of size x size."""
+    return img.convert("RGB").resize((size, size), Image.LANCZOS)
 
 
 def process_split(split: str) -> None:
@@ -71,7 +88,7 @@ def process_split(split: str) -> None:
             continue
 
         with Image.open(img_path) as im:
-            im = im.convert("RGB").resize(TARGET_SIZE, Image.LANCZOS)
+            im = resize_image(im)
 
             out_dir = PROCESSED_DIR / split / category_name
             out_dir.mkdir(parents=True, exist_ok=True)

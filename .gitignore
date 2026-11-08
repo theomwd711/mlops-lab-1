@@ -2,3 +2,7 @@
 /data
 mlflow.db
 mlruns/
+
+.pytest_cache/
+.ruff_cache/
+__pycache__/
